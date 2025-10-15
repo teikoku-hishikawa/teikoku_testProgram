@@ -1,4 +1,5 @@
 import torch
+
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -29,11 +30,11 @@ def load_model_and_tokenizer(cfg: dict):
 
     # QLoRA の場合は 4bit でロードする必要があるので強制
     load_in_4bit = bool(cfg["model"].get("load_in_4bit", False))
-    if cfg["pref"]["training_mode"].lower() == "qlora":
+    if cfg["peft"]["training_mode"].lower() == "qlora":
         load_in_4bit = True
 
     # QLoRA or FullFineTuning を切り替え
-    if cfg["pref"]["training_mode"].lower() in ["qlora", "lora"]:
+    if cfg["peft"]["training_mode"].lower() in ["qlora", "lora"]:
         model = AutoModelForCausalLM.from_pretrained(
             model_name,
             torch_dtype=getattr(torch, cfg["model"]["dtype"]),
@@ -71,5 +72,4 @@ def setup_peft(model, cfg: dict):
         model = get_peft_model(model, peft_cfg)
 
     return model
-
 

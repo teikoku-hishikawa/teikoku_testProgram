@@ -6,7 +6,7 @@ from datasets import load_dataset
 def load_and_tokenize_data(cfg, tokenizer, dataset_path):
     
     dataset_param = {
-        "name": "jsonl",
+        "name": "json",
         "data_files":{
             "train": f"{dataset_path}/train.jsonl",
             "validation": f"{dataset_path}/valid.jsonl",
@@ -19,29 +19,48 @@ def load_and_tokenize_data(cfg, tokenizer, dataset_path):
     
     ds = load_dataset(
         dataset_param["name"],
-        dataset_param["data_files"]
+        data_files=dataset_param["data_files"],
+        split=None
     )
 
-    # Alpacaフォーマット: input + output
-    inp_col = dataset_param["columns"]["input"]
-    out_col = dataset_param["columns"]["output"]
-
     def tokenize_fn(example):
-        prompt = example[inp_col]
-        full_text = prompt + example[out_col]
-        tokenized = tokenizer(
-            full_text,
-            truncation=True,
-            padding="max_length",
-            max_length=cfg["model"]["max_seq_length"],
-        )
+        if "input" in example and "output" in example:
+            # Alpaca形式
+            prompt = example["input"]
+            output = example["output"]
+            if prompt is None: prompt = ""
+            if output is None: output = ""
+            full_text = prompt + output
 
-        # モデルが output 部分のみを学習するようにラベルを設定
-        prompt_len = len(tokenizer(prompt).input_ids)
-        labels = [-100] * prompt_len + tokenized["input_ids"][prompt_len:]
-        labels = labels[: cfg["model"]["max_seq_length"]]  # 長さを揃える
+            tokenized = tokenizer(
+                full_text,
+                truncation=True,
+                padding="max_length",
+                max_length=cfg["model"]["max_seq_length"],
+            )
 
-        tokenized["labels"] = labels
+            # output 部分のみ学習するようにラベル設定
+            prompt_len = len(tokenizer(prompt).input_ids)
+            labels = [-100] * prompt_len + tokenized["input_ids"][prompt_len:]
+            labels = labels[: cfg["model"]["max_seq_length"]]
+            tokenized["labels"] = labels
+
+        elif "text" in example:
+            # text-only形式
+            text = example["text"]
+            if text is None: text = ""
+            tokenized = tokenizer(
+                text,
+                truncation=True,
+                padding="max_length",
+                max_length=cfg["model"]["max_seq_length"],
+            )
+            tokenized["labels"] = tokenized["input_ids"]  # 全部学習対象
+
+        else:
+            # input/output/text がない場合はスキップ
+            return None
+
         return tokenized
 
     tokenized_ds = ds.map(tokenize_fn, batched=False)

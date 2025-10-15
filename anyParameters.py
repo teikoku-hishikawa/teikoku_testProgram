@@ -24,10 +24,16 @@ training = {
     "per_device_eval_batch_size":[1], # evalバッチサイズ
     "learning_rate":[2e-4], # 学習率
     "logging_steps":[50], # ロギングのステップ数
-    "save_steps":[200], # モデル保存のステップ数（save_strategyが"steps"の場合に有効）
     "evaluation_strategy":["steps"], # 評価の頻度 ("no", "steps", "epoch")
     "fp16":[True], # 16ビット浮動小数点精度で学習するか
-    "push_to_hub":[False] # Hugging Face Hubにモデルをプッシュするか
+    "push_to_hub":[False], # Hugging Face Hubにモデルをプッシュするか
+    "eval_steps":[200],                     # 評価のステップ間隔
+    "save_steps":[200],                     # 保存のステップ間隔
+    "save_total_limit":[3],                 # 保存するモデルの最大数（古いものから削除）
+    "load_best_model_at_end":[True],        # ✅ トレーニング完了時にベストモデルを読み込む
+    "metric_for_best_model":["eval_loss"],       # ✅ 評価指標を指定（例: "accuracy", "eval_loss" など）
+    "greater_is_better":[False],            # ✅ 指標が小さいほど良い場合（例: loss）
+    "logging_dir":["./logs"],               # ログ保存ディレクトリ
 }
 
 dataset = {

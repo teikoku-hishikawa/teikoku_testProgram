@@ -1,0 +1,5 @@
+  0%|                                                                                                                                                                                                               | 0/19608 [00:00<?, ?it/s]`use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+/home/teikoku/.conda/envs/.venv/lib/python3.11/site-packages/torch/_dynamo/eval_frame.py:929: UserWarning: torch.utils.checkpoint: the use_reentrant parameter should be passed explicitly. In version 2.5 we will raise an exception if use_reentrant is not passed. use_reentrant=False is recommended, but if you need to preserve the current default behavior, you can pass use_reentrant=True. Refer to docs for more details on the differences between the two variants.
+  return fn(*args, **kwargs)
+  0%|▊                                                                                                                                                                                                  | 87/19608 [07:54<29:39:20,  5.47s/it]
+{'loss': 3.3901, 'grad_norm': 0.1595204621553421, 'learning_rate': 0.00019950020399836803, 'epoch': 0.01}
